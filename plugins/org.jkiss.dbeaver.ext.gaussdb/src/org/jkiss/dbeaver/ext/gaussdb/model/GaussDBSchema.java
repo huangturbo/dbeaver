@@ -203,12 +203,10 @@ public class GaussDBSchema extends PostgreSchema {
         @NotNull
         @Override
         protected JDBCStatement prepareObjectsStatement(JDBCSession session, PostgreTableContainer container, PostgreTableBase forParent) throws SQLException {
-            GaussDBDatabase database = (GaussDBDatabase) container.getDatabase();
-            String mode= database.getDatabaseCompatibleMode();
             StringBuilder sql = new StringBuilder(
                 "SELECT c.oid,c.*,t.relname as tabrelname,rt.relnamespace as refnamespace,d.description" +
                     (!getDataSource().getServerType().supportsPGConstraintExpressionColumn() ? ", null as consrc_copy" :
-                    ", case when c.contype='c' then " + ("M".equals(mode) ? "substring" : "\"substring\"")+ "(pg_get_constraintdef(c.oid), 7) else null end consrc_copy") +
+                        ", case when c.contype='c' then " + (isMMode() ? "substring" : "\"substring\"")+ "(pg_get_constraintdef(c.oid), 7) else null end consrc_copy") +
                     "\nFROM pg_catalog.pg_constraint c" +
                     "\nINNER JOIN pg_catalog.pg_class t ON t.oid=c.conrelid" +
                     "\nLEFT OUTER JOIN pg_catalog.pg_class rt ON rt.oid=c.confrelid" +
