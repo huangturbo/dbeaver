@@ -22,17 +22,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jkiss.code.Nullable;
-import org.jkiss.dbeaver.DBException;
-import org.jkiss.dbeaver.Log;
 import org.jkiss.dbeaver.ModelPreferences;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreDataTypeCache;
 import org.jkiss.dbeaver.ext.postgresql.model.PostgreDialect;
 import org.jkiss.dbeaver.model.DBPDataSource;
 import org.jkiss.dbeaver.model.preferences.DBPPreferenceStore;
 import org.jkiss.dbeaver.model.struct.rdb.DBSProcedure;
 import org.jkiss.dbeaver.model.struct.rdb.DBSProcedureParameter;
 import org.jkiss.dbeaver.runtime.DBWorkbench;
-import org.jkiss.dbeaver.utils.DatabaseCompatibilityProvider;
 import org.jkiss.utils.ArrayUtils;
 import org.jkiss.utils.CommonUtils;
 
@@ -40,11 +36,9 @@ public class GaussDBDialect extends PostgreDialect {
 
     private GaussDBDataSource dataSource;
 
-    private static final Log log = Log.getLog(PostgreDataTypeCache.class);
-
     public static final String[][] MYSQL_QUOTE_STRINGS = {
-        {"`", "`"},
-        {"\"", "\""},
+            {"`", "`"},
+            {"\"", "\""},
     };
 
     public GaussDBDialect() {
@@ -152,14 +146,7 @@ public class GaussDBDialect extends PostgreDialect {
         String[][] quoteStrings;
         String databaseCompatibleMode = "";
         GaussDBDataSource dataSource = getDataSource();
-        if (dataSource instanceof DatabaseCompatibilityProvider) {
-            DatabaseCompatibilityProvider compatibilityProvider = (DatabaseCompatibilityProvider) dataSource;
-            try {
-                databaseCompatibleMode = compatibilityProvider.getDatabaseCompatibleMode();
-            } catch (DBException e) {
-                log.error("Failed to get GaussDB compatibility mode", e);
-            }
-        }
+        databaseCompatibleMode = dataSource.getDatabaseCompatibleMode();
         if (!databaseCompatibleMode.isEmpty() && "M".equals(databaseCompatibleMode)) {
             quoteStrings = this.MYSQL_QUOTE_STRINGS;
             forceCaseSensitive = false;
@@ -167,9 +154,6 @@ public class GaussDBDialect extends PostgreDialect {
             quoteStrings = this.getIdentifierQuoteStrings();
         }
 
-        if (ArrayUtils.isEmpty(quoteStrings)) {
-            return str;
-        }
         if (ArrayUtils.isEmpty(quoteStrings)) {
             return str;
         }
