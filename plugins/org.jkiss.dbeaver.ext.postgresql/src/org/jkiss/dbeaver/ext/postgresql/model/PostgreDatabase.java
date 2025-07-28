@@ -234,6 +234,7 @@ public class PostgreDatabase extends JDBCRemoteInstance
     // Because datasource is not fully initialized yet
     void checkInstanceConnection(@NotNull DBRProgressMonitor monitor, boolean cacheMetadata) throws DBException {
         if (!isSharedDatabase() && executionContext == null) {
+            getDataSource().setCurrentDatabase(this);//set the database to be operated as the current database
             initializeMainContext(monitor);
             initializeMetaContext(monitor);
             if (cacheMetadata)
@@ -692,7 +693,11 @@ public class PostgreDatabase extends JDBCRemoteInstance
         return schemaCache.getCachedObject(PostgreConstants.PUBLIC_SCHEMA_NAME);
     }
 
-    void cacheDataTypes(DBRProgressMonitor monitor, boolean forceRefresh) throws DBException {
+
+    protected String getBaseTypeNameClause(PostgreDataSource dataSource) {
+        return PostgreDataTypeCache.getBaseTypeNameClause(dataSource);
+    }
+    protected void cacheDataTypes(DBRProgressMonitor monitor, boolean forceRefresh) throws DBException {
         boolean hasDataTypes;
         synchronized (dataTypeCache) {
             hasDataTypes = !dataTypeCache.isEmpty();
@@ -706,12 +711,14 @@ public class PostgreDatabase extends JDBCRemoteInstance
 
             PostgreDataSource postgreDataSource = getDataSource();
             boolean readAllTypes = postgreDataSource.supportReadingAllDataTypes();
-
             try (JDBCSession session = DBUtils.openMetaSession(monitor, this, "Read data types")) {
                 StringBuilder sql = new StringBuilder(256);
                 boolean supportsSysTypColumn = supportsSysTypCategoryColumn(session); // Do not read all array and table types, unless the user has decided otherwise
-                sql.append("SELECT t.oid,t.*,c.relkind,").append(PostgreDataTypeCache.getBaseTypeNameClause(postgreDataSource)).append(", d.description" +
-                        "\nFROM pg_catalog.pg_type t");
+
+                sql.append("SELECT t.oid,t.*,c.relkind,").append(getBaseTypeNameClause(postgreDataSource)).append(", d.description" +
+                          "\nFROM pg_catalog.pg_type t");
+//              sql.append("SELECT t.oid,t.*,c.relkind,").append(PostgreDataTypeCache.getBaseTypeNameClause(postgreDataSource)).append(", d.description" +
+//                        "\nFROM pg_catalog.pg_type t");
                 if (!readAllTypes && supportsSysTypColumn) {
                     sql.append("\nLEFT OUTER JOIN pg_catalog.pg_type et ON et.oid=t.typelem "); // If typelem is not 0 then it identifies another row in pg_type
                 }
@@ -763,7 +770,7 @@ public class PostgreDatabase extends JDBCRemoteInstance
 
     // Column "typcategory" appeared only in PG version 8.4 and before we relied on DB version to verify the conditions, but it was not the most universal solution.
     // So make a separate request to the database for checking.
-    boolean supportsSysTypCategoryColumn(JDBCSession session) {
+    public boolean supportsSysTypCategoryColumn(JDBCSession session) {
         if (supportTypColumn == null) {
             if (!dataSource.isServerVersionAtLeast(10, 0)) {
                 if (!dataSource.isServerVersionAtLeast(8, 4)) {

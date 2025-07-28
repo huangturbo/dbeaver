@@ -1,0 +1,74 @@
+/*
+ * DBeaver - Universal Database Manager
+ * Copyright (C) 2010-2025 DBeaver Corp and others
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.jkiss.dbeaver.ext.gaussdb.model;
+
+import java.sql.SQLException;
+
+import org.jkiss.code.NotNull;
+import org.jkiss.dbeaver.ext.postgresql.model.PostgreDataSource;
+import org.jkiss.dbeaver.ext.postgresql.model.PostgreDataTypeCache;
+import org.jkiss.dbeaver.ext.postgresql.model.PostgreSchema;
+import org.jkiss.dbeaver.model.exec.jdbc.JDBCPreparedStatement;
+import org.jkiss.dbeaver.model.exec.jdbc.JDBCSession;
+import org.jkiss.dbeaver.model.exec.jdbc.JDBCStatement;
+
+public class GaussDBDataTypeCache extends PostgreDataTypeCache {
+
+    GaussDBDataTypeCache() {
+        super();
+    }
+        @NotNull
+    @Override
+    protected JDBCStatement prepareObjectsStatement(@NotNull JDBCSession session, @NotNull PostgreSchema owner) throws SQLException {
+        // Initially cache only base types (everything but composite and some arrays)
+        PostgreDataSource dataSource = owner.getDataSource();
+
+        String baseTypeNameClause=((GaussDBDatabase)dataSource.getDefaultInstance()).getBaseTypeNameClause(dataSource);
+        //or getCurrentDatabase
+        boolean readAllTypes = dataSource.supportReadingAllDataTypes();
+        boolean supportsSysTypColumn = owner.getDatabase().supportsSysTypCategoryColumn(session);
+        StringBuilder sql = new StringBuilder(256);
+        sql.append("SELECT t.oid,t.*,c.relkind,").append(baseTypeNameClause).append(", d.description" +
+            "\nFROM pg_catalog.pg_type t");
+        if (!readAllTypes && supportsSysTypColumn) {
+            sql.append("\nLEFT OUTER JOIN pg_catalog.pg_type et ON et.oid=t.typelem ");
+        }
+        sql.append("\nLEFT OUTER JOIN pg_catalog.pg_class c ON c.oid=t.typrelid" +
+            "\nLEFT OUTER JOIN pg_catalog.pg_description d ON t.oid=d.objoid" +
+            "\nWHERE t.typname IS NOT NULL");
+        if (!readAllTypes) {
+            sql.append("\nAND (c.relkind IS NULL OR c.relkind = 'c')");
+            if (supportsSysTypColumn) {
+                sql.append(" AND (et.typcategory IS NULL OR et.typcategory <> 'C')");
+            }
+        }
+        sql.append("\nAND t.typnamespace=? ");
+        final JDBCPreparedStatement dbStat = session.prepareStatement(sql.toString());
+        dbStat.setLong(1, owner.getObjectId());
+        return dbStat;
+    }
+    static String getBaseTypeNameClause(PostgreDataSource dataSource,String databaseCompatibleMode) {
+        if ("M".equals(databaseCompatibleMode)) {
+                return "t.typname as base_type_name";
+        }
+        if (dataSource.isServerVersionAtLeast(7, 3)) {
+            return "format_type(nullif(t.typbasetype, 0), t.typtypmod) as base_type_name";
+        } else {
+            return "NULL as base_type_name";
+        }
+    }
+}

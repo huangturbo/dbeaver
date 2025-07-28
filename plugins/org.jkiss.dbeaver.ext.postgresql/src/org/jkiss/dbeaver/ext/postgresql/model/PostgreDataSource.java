@@ -94,6 +94,7 @@ public class PostgreDataSource extends JDBCDataSource implements DBSInstanceCont
     private DatabaseCache databaseCache;
     private SettingCache settingCache;
     private String activeDatabaseName;
+    private String currentDatabaseName;
     private PostgreServerExtension serverExtension;
     protected String serverVersion;
     private boolean shouldShowStatistics;
@@ -687,6 +688,31 @@ public class PostgreDataSource extends JDBCDataSource implements DBSInstanceCont
             defDatabase = allDatabases.get(0);
         }
         return defDatabase;
+    }
+
+    @NotNull
+    public PostgreDatabase getCurrentDatabase(){
+        //The target database to be operated
+        PostgreDatabase defDatabase = databaseCache.getCachedObject(currentDatabaseName);
+        if (defDatabase == null) {
+            defDatabase = databaseCache.getCachedObject(PostgreConstants.DEFAULT_DATABASE);
+        }
+        if (defDatabase == null) {
+            final List<PostgreDatabase> allDatabases = databaseCache.getCachedObjects();
+            if (allDatabases.isEmpty()) {
+                throw new IllegalStateException("No databases found on the server");
+            }
+            defDatabase = allDatabases.get(0);
+        }
+        return defDatabase;
+    }
+
+    void setCurrentDatabase(PostgreDatabase newDatabase) {
+        final PostgreDatabase oldDatabase = getCurrentDatabase();
+        if (oldDatabase == newDatabase) {
+            return;
+        }
+        currentDatabaseName = newDatabase.getName();
     }
 
     @NotNull

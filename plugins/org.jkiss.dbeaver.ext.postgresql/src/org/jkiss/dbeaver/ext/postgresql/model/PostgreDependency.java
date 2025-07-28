@@ -262,7 +262,8 @@ public class PostgreDependency implements PostgreObject, DBPOverloadedObject, DB
                     "        WHEN co.oid IS NOT NULL THEN 'C'::text || contype::text\n" +
                     "        WHEN ad.oid IS NOT NULL THEN 'A'::text\n" +
                     "        ELSE ''\n" +
-                    "    END AS type,\n" + (isMMode ?
+                    "    END AS type,\n" +
+                    (isMMode ?
                     "    COALESCE(coc.relname::text, clrw.relname::text, tgr.relname::text) AS ownertable,\n" +
                     "    CASE WHEN cl.relname IS NOT NULL AND att.attname IS NOT NULL THEN CONCAT(cl.relname, '.', att.attname)::text\n" +
                     "    ELSE COALESCE(cl.relname::text, co.conname::text, pr.proname::text, tg.tgname::text, ty.typname::text, la.lanname::text, rw.rulename::text, ns.nspname::text)\n" +

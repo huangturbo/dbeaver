@@ -90,7 +90,7 @@ public class GaussDBDataSource extends PostgreDataSource implements DatabaseComp
 
     @Override
     public String getDatabaseCompatibleMode() {
-        GaussDBDatabase database = (GaussDBDatabase) this.getDefaultInstance();
+        GaussDBDatabase database = (GaussDBDatabase) this.getCurrentDatabase();
         return database.getDatabaseCompatibleMode();
     }
 }

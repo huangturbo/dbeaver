@@ -22,11 +22,7 @@ import java.sql.SQLException;
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
 import org.jkiss.dbeaver.DBException;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreCharset;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreDatabase;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreRole;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreSchema;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreTablespace;
+import org.jkiss.dbeaver.ext.postgresql.model.*;
 import org.jkiss.dbeaver.model.exec.DBCException;
 import org.jkiss.dbeaver.model.exec.DBCExecutionPurpose;
 import org.jkiss.dbeaver.model.exec.jdbc.JDBCPreparedStatement;
@@ -182,4 +178,11 @@ public class GaussDBDatabase extends PostgreDatabase {
     public void checkPackageSupport(DBRProgressMonitor monitor) {
         setPackageSupported("Oracle".equalsIgnoreCase(DBCompatibilityEnum.queryTextByValue(this.databaseCompatibleMode)));
     }
+
+    @Override
+    protected String getBaseTypeNameClause(PostgreDataSource dataSource) {
+        return GaussDBDataTypeCache.getBaseTypeNameClause(dataSource,databaseCompatibleMode);
+
+    }
+
 }

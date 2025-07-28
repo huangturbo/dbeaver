@@ -26,14 +26,7 @@ import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
 import org.jkiss.dbeaver.DBException;
 import org.jkiss.dbeaver.Log;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreDatabase;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreIndex;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreProcedureKind;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreRole;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreSchema;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreServerExtension;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreTableBase;
-import org.jkiss.dbeaver.ext.postgresql.model.PostgreTableContainer;
+import org.jkiss.dbeaver.ext.postgresql.model.*;
 import org.jkiss.dbeaver.model.exec.jdbc.JDBCPreparedStatement;
 import org.jkiss.dbeaver.model.exec.jdbc.JDBCResultSet;
 import org.jkiss.dbeaver.model.exec.jdbc.JDBCSession;
@@ -54,6 +47,9 @@ public class GaussDBSchema extends PostgreSchema {
 
     public GaussDBSchema(PostgreDatabase owner, String name, JDBCResultSet resultSet) throws SQLException {
         super(owner, name, resultSet);
+
+        dataTypeCache=new GaussDBDataTypeCache();
+
         this.packageCache = new PackageCache();
         this.proceduresCache = new ProceduresCache();
         this.functionsCache = new FunctionsCache();
@@ -63,6 +59,7 @@ public class GaussDBSchema extends PostgreSchema {
 
     public GaussDBSchema(PostgreDatabase database, String name, PostgreRole owner) {
         super(database, name, owner);
+        dataTypeCache=new GaussDBDataTypeCache();
         this.packageCache = new PackageCache();
         this.proceduresCache = new ProceduresCache();
         this.functionsCache = new FunctionsCache();
