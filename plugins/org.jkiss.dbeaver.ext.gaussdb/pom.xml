@@ -11,4 +11,5 @@
   <artifactId>org.jkiss.dbeaver.ext.gaussdb</artifactId>
   <version>1.0.21-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+
 </project>

@@ -99,7 +99,7 @@ public class PostgreDatabase extends JDBCRemoteInstance
     private final AvailableExtensionCache availableExtensionCache = new AvailableExtensionCache();
     private final CollationCache collationCache = new CollationCache();
     public final TablespaceCache tablespaceCache = new TablespaceCache();
-    private final LongKeyMap<PostgreDataType> dataTypeCache = new LongKeyMap<>();
+    protected final LongKeyMap<PostgreDataType> dataTypeCache = new LongKeyMap<>();
     public final JobCache jobCache = new JobCache();
     public final JobClassCache jobClassCache = new JobClassCache();
 
@@ -679,7 +679,7 @@ public class PostgreDatabase extends JDBCRemoteInstance
     }
 
     @Nullable
-    PostgreSchema getCatalogSchema() {
+    protected PostgreSchema getCatalogSchema() {
         return schemaCache.getCachedObject(PostgreConstants.CATALOG_SCHEMA_NAME);
     }
 
@@ -946,7 +946,6 @@ public class PostgreDatabase extends JDBCRemoteInstance
         if (typeId <= 0) {
             return null;
         }
-
         PostgreDataType dataType;
         synchronized (dataTypeCache) {
             dataType = dataTypeCache.get(typeId);

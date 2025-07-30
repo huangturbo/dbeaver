@@ -831,6 +831,13 @@ public class PostgreDataSource extends JDBCDataSource implements DBSInstanceCont
         return isConnectionRefreshing;
     }
 
+
+    public List<PostgreDependency> readDependencies(DBRProgressMonitor monitor, PostgreObject object, boolean dependents)
+        throws DBCException {
+
+        return PostgreDependency.readDependencies(monitor, object, true);
+    }
+
     private static class DatabaseCache extends SimpleObjectCache<PostgreDataSource, PostgreDatabase> {
     }
 
