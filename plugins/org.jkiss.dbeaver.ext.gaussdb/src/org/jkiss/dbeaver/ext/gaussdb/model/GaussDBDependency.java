@@ -30,7 +30,6 @@ import org.jkiss.dbeaver.model.exec.jdbc.JDBCResultSet;
 import org.jkiss.dbeaver.model.exec.jdbc.JDBCSession;
 import org.jkiss.dbeaver.model.impl.jdbc.JDBCUtils;
 import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;
-import org.jkiss.dbeaver.utils.DatabaseCompatibilityProvider;
 import org.jkiss.utils.CommonUtils;
 
 public class GaussDBDependency extends PostgreDependency {

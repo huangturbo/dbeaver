@@ -28,7 +28,7 @@ import org.jkiss.dbeaver.model.impl.jdbc.JDBCUtils;
 import org.jkiss.dbeaver.model.meta.Property;
 import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;
 import org.jkiss.dbeaver.model.struct.DBSObject;
-import org.jkiss.dbeaver.utils.DatabaseCompatibilityProvider;
+
 import org.jkiss.utils.CommonUtils;
 
 import java.util.ArrayList;
