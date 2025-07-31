@@ -234,7 +234,6 @@ public class PostgreDatabase extends JDBCRemoteInstance
     // Because datasource is not fully initialized yet
     void checkInstanceConnection(@NotNull DBRProgressMonitor monitor, boolean cacheMetadata) throws DBException {
         if (!isSharedDatabase() && executionContext == null) {
-            getDataSource().setCurrentDatabase(this);//set the database to be operated as the current database
             initializeMainContext(monitor);
             initializeMetaContext(monitor);
             if (cacheMetadata)
@@ -717,8 +716,6 @@ public class PostgreDatabase extends JDBCRemoteInstance
 
                 sql.append("SELECT t.oid,t.*,c.relkind,").append(getBaseTypeNameClause(postgreDataSource)).append(", d.description" +
                           "\nFROM pg_catalog.pg_type t");
-//              sql.append("SELECT t.oid,t.*,c.relkind,").append(PostgreDataTypeCache.getBaseTypeNameClause(postgreDataSource)).append(", d.description" +
-//                        "\nFROM pg_catalog.pg_type t");
                 if (!readAllTypes && supportsSysTypColumn) {
                     sql.append("\nLEFT OUTER JOIN pg_catalog.pg_type et ON et.oid=t.typelem "); // If typelem is not 0 then it identifies another row in pg_type
                 }
