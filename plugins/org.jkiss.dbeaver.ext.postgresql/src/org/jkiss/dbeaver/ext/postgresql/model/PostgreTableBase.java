@@ -131,7 +131,6 @@ public abstract class PostgreTableBase extends JDBCTable<PostgreDataSource, Post
 
     @Association
     public List<PostgreDependency> getDependencies(DBRProgressMonitor monitor) throws DBCException {
-        //return this.getDataSource().readDependencies(monitor, this, true);
         return PostgreDependency.readDependencies(monitor, this, true);
     }
 

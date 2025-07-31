@@ -33,19 +33,17 @@ public class GaussDBTableRegular extends PostgreTableRegular {
     }
 
     public GaussDBTableRegular(DBRProgressMonitor monitor, PostgreSchema catalog, PostgreTableRegular source)
-        throws DBException {
+            throws DBException {
         super(monitor, catalog, source);
     }
 
     public GaussDBTableRegular(PostgreSchema catalog, ResultSet dbResult) {
         super(catalog, dbResult);
     }
+
     @Override
     public List<PostgreDependency> getDependencies(DBRProgressMonitor monitor) throws DBCException {
-
-        //return this.getDataSource().readDependencies(monitor, this, true);
         return GaussDBDependency.readDependencies(monitor, this, true);
-
     }
 
 }

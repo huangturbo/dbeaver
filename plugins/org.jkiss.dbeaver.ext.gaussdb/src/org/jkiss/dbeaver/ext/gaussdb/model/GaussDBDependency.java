@@ -43,9 +43,7 @@ public class GaussDBDependency extends PostgreDependency {
      */
     public static List<PostgreDependency> readDependencies(DBRProgressMonitor monitor, PostgreObject object, boolean dependents) throws
         DBCException {
-
         Boolean isMMode = ((GaussDBDatabase)object.getDatabase()).getDatabaseCompatibleMode().equals("M");
-
         List<PostgreDependency> dependencies = new ArrayList<>();
         try (JDBCSession session = DBUtils.openMetaSession(monitor, object, "Load object dependencies")) {
             String queryObjId = dependents ? "objid" : "refobjid";
